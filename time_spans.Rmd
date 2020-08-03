@@ -1,0 +1,52 @@
+---
+title: "Time Spans"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(dplyr)
+library(readr)
+library(tidyverse)
+```
+
+First, the Emergency Response Incidents Dataset is loaded. 
+
+```{r}
+my_data <- read_csv("https://data.cityofnewyork.us/resource/pasr-j7fb.csv")
+head(my_data)
+```
+
+First, I view the structure of the dataset.
+
+```{r}
+str(my_data)
+```
+The two date-time columns are creation_date and closed_date. These columns are type "POSIXct" by default. 
+
+Since, this dataset is about Emergency Response times the time span should be minutes, hours or days. 
+
+### Calculation time span:
+
+When I subtract the two date-time columns the time span is returned in minutes by default. Then I convert the column datatype to a number. 
+```{r}
+my_data$response_time_span_min = (my_data$closed_date - my_data$creation_date)
+my_data$response_time_span_min = as.numeric(my_data$response_time_span_min)
+```
+
+Next, I divided the time span in minutes by 60 (60 minutes in a hour) to find the time span in hours. 
+```{r}
+my_data$response_time_span_hours = my_data$response_time_span_min/60
+```
+
+Then, I divided the time span in hours by 24 (24 hours in a day) to find the time span in days.
+```{r}
+my_data$response_time_span_days = my_data$response_time_span_hours/24
+```
+
+Here is the structure of the dataset with the extra time span columns.
+```{r}
+my_data_no_missing = na.omit(my_data)
+str(my_data_no_missing)
+```

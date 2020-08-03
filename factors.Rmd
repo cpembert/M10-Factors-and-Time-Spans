@@ -1,0 +1,61 @@
+---
+title: "Factors"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(dplyr)
+library(readr)
+library(tidyverse)
+```
+
+First, the Emergency Response Incidents Dataset is loaded. 
+
+```{r}
+my_data <- read_csv("https://data.cityofnewyork.us/resource/pasr-j7fb.csv")
+head(my_data)
+```
+
+Next, we need to view the structure of the dataset. 
+
+```{r}
+str(my_data)
+```
+The three factor variables are location, borough, and incident type. 
+
+Here is the count of each variables' number of distinct values.
+
+```{r}
+n_distinct(my_data$incident_type)
+n_distinct(my_data$location)
+n_distinct(my_data$borough)
+```
+Here are the unique values of incident type. 
+```{r}
+unique(my_data$incident_type)
+```
+Here are the unique values for the borough factor variable. 
+```{r}
+unique(my_data$borough)
+```
+The location variable has too many unique value to show. It can be split up into the house number and street name, with the street name likely having less levels. Also, the street names containing a cardinal number could be converted to ordinal numbers. 
+
+The incident type variable can be split into two categories by the dash - main incident type and the incident type sub category. 
+
+There should only be 5 boroughs in this column. Using consistent capitalization, deleting rows with the "New York" level, and renaming the neighborhood levels (Jamaica, Far Rockaway, Richmond Hill) with their actual boroughs will fix this. 
+
+### Fixing Incident Type:
+
+Splitting into two columns:
+```{r}
+my_data = my_data %>%
+  separate(incident_type, c("incident_type_main", "incident_type_sub"), "-")
+head(my_data[c("incident_type_main", "incident_type_sub")])
+```
+Viewing unique main incident types:
+```{r}
+unique(my_data$incident_type_main)
+```
+It's easier to categorize the incident type now since incident_type_main has much fewer unique values. For visualization, I can now use a bar graph since there are fewer levels now. Also, I can filter by the main incident type to view the subcategories for only one main category at a time. Sort() is also more effective because of the lower level count in incident_type_main. 
