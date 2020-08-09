@@ -1,0 +1,58 @@
+---
+title: "Emergency Reponse Incidents Dashhboard"
+output: flexdashboard::flex_dashboard
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.width = 10, fig.height = 5)
+library(ggplot2)
+library(dplyr)
+library(readr)
+library(tidyverse)
+```
+
+Loading the Data + M10 Timespan & Factor Transformation
+```{r}
+# Loading Data
+my_data <- read_csv("https://data.cityofnewyork.us/resource/pasr-j7fb.csv")
+
+# Creating Time Spans
+my_data$response_time_span_min = (my_data$closed_date - my_data$creation_date)
+my_data$response_time_span_min = as.numeric(my_data$response_time_span_min)
+my_data$response_time_span_hours = my_data$response_time_span_min/60
+my_data$response_time_span_days = my_data$response_time_span_hours/24
+
+# Creating Factors
+my_data = my_data %>%
+  separate(incident_type, c("incident_type_main", "incident_type_sub"), "-")
+```
+
+## Exploring Incident Types
+
+### Main Incident Types Bar Graph
+```{r}
+ggplot(my_data, aes(incident_type_main)) +
+  geom_bar(fill = "green") + coord_flip()
+```
+
+### Subcategories for Main Incident == 'Fire'
+```{r}
+fire <- my_data[ which(my_data$incident_type_main == 'Fire'),]
+ggplot(fire, aes(incident_type_sub)) +
+  geom_bar(fill = "blue") + coord_flip()
+```
+
+## Exploring Response Times
+
+### Response Time in Hours - Histogram 
+```{r}
+ggplot(data=my_data, aes(response_time_span_hours)) + 
+  geom_histogram(bins = 30, fill = 'gold')
+```
+
+### Boxplot: Response Time in Hours Per Incident Type Main 
+```{r}
+ggplot(my_data, aes(x=incident_type_main, y=response_time_span_hours)) + 
+  geom_boxplot(fill="white")
+```
+
